@@ -1,5 +1,3 @@
-import http.client
-import json
 import httpx
 from fastapi.exceptions import HTTPException
 

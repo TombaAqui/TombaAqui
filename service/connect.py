@@ -1,4 +1,3 @@
-import psycopg2
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker
 
@@ -9,7 +8,6 @@ class Connect:
         self.POSTGRES_DB = "bd_micro_service"
         self.POSTGRES_USER = "postgres"
         self.POSTGRES_PASSWORD = "postgres"
-        # Carregar as variáveis de ambiente
 
         self.DB_URL = f"postgresql+psycopg2://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@localhost/{self.POSTGRES_DB}"
 

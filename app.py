@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 
-
 from modules.company.controller import company_router
 from service.connect import Connect
 

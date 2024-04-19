@@ -1,10 +1,6 @@
-import http.client
-import json
 from typing import List
 
-from fastapi import APIRouter, requests
-
-from fastapi import APIRouter, Depends, status, Request
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from depends import get_db_session, authenticate_ms_token
