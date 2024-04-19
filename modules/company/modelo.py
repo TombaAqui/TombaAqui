@@ -2,7 +2,6 @@ from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import relationship
 
 from base import Base
-from modules.department.modelo import Department
 
 
 class Company(Base):
