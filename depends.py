@@ -5,9 +5,14 @@ from service.connect import Connect
 
 
 async def authenticate_ms_token(token: str):
+    if token is None:
+        raise HTTPException(status_code=401, detail="Token not provided")
     auth_endpoint = "http://localhost:8000/user/api/v1/authentication/validation/"
 
-    headers = {"Content-Type": "application/json"}
+    headers = {
+        "Authorization": "Bearer %s" % token,
+        "Content-Type": "application/json"
+    }
     payload = {"token": token}
 
     async with httpx.AsyncClient() as client:
