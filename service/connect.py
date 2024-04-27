@@ -1,11 +1,15 @@
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy_utils import database_exists, create_database
+from base import Base
+from modules.company.modelo import Company
+from modules.department.modelo import Department
 
 
 class Connect:
 
     def __init__(self):
-        self.POSTGRES_DB = "bd_micro_service"
+        self.POSTGRES_DB = "bd_tomba_aqui"
         self.POSTGRES_USER = "postgres"
         self.POSTGRES_PASSWORD = "postgres"
 
@@ -15,6 +19,21 @@ class Connect:
         self.Session = sessionmaker(bind=self.engine)
 
         self.metadata = MetaData()
+
+    def create_database(self):
+        if not database_exists(self.engine.url):
+            create_database(self.engine.url)
+            print("Database created successfully.")
+
+    def create_tables(self):
+        # Carrega as informações do banco de dados existente
+        self.metadata.reflect(bind=self.engine)
+        if "componies" not in self.metadata.tables:
+            Base.metadata.create_all(bind=self.engine, tables=[Company.__table__])
+            print("Table 'companies' created.")
+        if "departments" not in self.metadata.tables:
+            Base.metadata.create_all(bind=self.engine, tables=[Department.__table__])
+            print("Table 'departments' created.")
 
     def get_session(self):
         return self.Session()
