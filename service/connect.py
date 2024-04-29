@@ -4,6 +4,7 @@ from sqlalchemy_utils import database_exists, create_database
 from base import Base
 from modules.company.modelo import Company
 from modules.department.modelo import Department
+from modules.equipment.modelo import Equipment
 
 
 class Connect:
@@ -28,12 +29,16 @@ class Connect:
     def create_tables(self):
         # Carrega as informações do banco de dados existente
         self.metadata.reflect(bind=self.engine)
-        if "componies" not in self.metadata.tables:
+
+        if "companies" not in self.metadata.tables:
             Base.metadata.create_all(bind=self.engine, tables=[Company.__table__])
             print("Table 'companies' created.")
         if "departments" not in self.metadata.tables:
             Base.metadata.create_all(bind=self.engine, tables=[Department.__table__])
             print("Table 'departments' created.")
+        if "equipments" not in self.metadata.tables:
+            Base.metadata.create_all(bind=self.engine, tables=[Equipment.__table__])
+            print("Table 'equipments' created.")
 
     def get_session(self):
         return self.Session()

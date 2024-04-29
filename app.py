@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 
 from modules.company.controller import company_router
+from modules.equipment.controller import equipment_router
 from service.connect import Connect
 
 app = FastAPI()
 app.include_router(company_router)
+app.include_router(equipment_router)
 
 if __name__ == "__main__":
     import uvicorn

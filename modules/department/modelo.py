@@ -12,3 +12,4 @@ class Department(Base):
     company_id = Column(Integer, ForeignKey('companies.id'))
 
     company = relationship("Company", back_populates="departments")
+    equipments = relationship("Equipment", back_populates="department")
