@@ -1,11 +1,10 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, status, HTTPException, Header
+from fastapi import APIRouter, Depends, status, Header
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from depends import get_db_session, authenticate_ms_token
-from modules.company.dao import get_departments_by_company_id, get_company_by_id
 from modules.company.modelo import Company
 
 company_router = APIRouter(prefix="/tomba")
