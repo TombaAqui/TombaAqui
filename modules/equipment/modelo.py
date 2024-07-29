@@ -1,7 +1,3 @@
-from typing import Optional
-
-from pydantic import BaseModel
-from fastapi import UploadFile
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -17,10 +13,4 @@ class Equipment(Base):
     image = Column(String(255))
 
     department = relationship("Department", back_populates="equipments")
-
-
-class EquipmentCreate(BaseModel):
-    description: str
-    department_id: int
-    image: Optional[UploadFile] = None
 

@@ -1,11 +1,11 @@
-from fastapi import APIRouter, UploadFile, File, Depends, Form, status, Header, HTTPException
+from fastapi import APIRouter, File, Depends, Form, status, Header, HTTPException
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
 
 from depends import get_db_session, authenticate_ms_token
 from modules.company.dao import get_company_by_id
-from modules.department.modelo import Department
-from modules.equipment.dao import create_equipment_in_db, get_equipment_by_company_id
+from modules.department.dao import get_department_by_id
+from modules.equipment.dao import *
+from modules.equipment.schemas import EquipmentResponse
 
 equipment_router = APIRouter(prefix="/tomba")
 
@@ -19,12 +19,13 @@ async def create_equipment(token: str = Form(...), description: str = Form(...),
     if not any(ext in image.filename.lower() for ext in ('.jpg', '.jpeg', '.png')):
         return JSONResponse({"error": "Unsupported file type. Please upload only jpg, jpeg, or png files."},
                             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-    department = db_session.query(Department).filter(Department.id == department_id).first()
+    department = get_department_by_id(db=db_session, department_id=department_id)
     if not department:
         return JSONResponse({"error": f"Department with ID {department_id} not found"},
                             status_code=status.HTTP_404_NOT_FOUND)
-    create_equipment_in_db(description, department_id, image, db_session)
-    return JSONResponse(content={"message": "Equipment created successfully."}, status_code=status.HTTP_201_CREATED)
+    equipment = create_equipment_in_db(description, department_id, image, db_session)
+    equipment_response = EquipmentResponse.from_orm(equipment)
+    return JSONResponse(content={"message": "Equipment created successfully.", "equipment": equipment_response.dict()}, status_code=status.HTTP_201_CREATED)
 
 
 @equipment_router.get("/api/v1/company/{id_company}/equipments/")
@@ -56,3 +57,18 @@ async def get_equipments_by_deparment(id_company: int, id_department: int, token
         raise HTTPException(status_code=404, detail='Department not found')
     return {"response": department.equipments}
 
+
+@equipment_router.put("/api/v1/equipment/{equipment_id}/")
+async def update_equipment_by(equipment_id: int, token: str = Form(...), description: str = Form(...), department_id: int = Form(...), image: UploadFile = File(None), db_session: Session = Depends(get_db_session)):
+    await authenticate_ms_token(token)
+    equipment = get_equipment_by_id(db=db_session, equipment_id=equipment_id)
+    if not equipment:
+        raise HTTPException(status_code=404, detail="Equipment not found")
+    updated_equipment = update_equipment(
+        db=db_session,
+        equipment=equipment,
+        department_id=department_id,
+        description=description,
+        image=image)
+    equipment_response = EquipmentResponse.from_orm(updated_equipment)
+    return JSONResponse(content={"message": "Equipment updated successfully.", "equipment": equipment_response.dict()}, status_code=status.HTTP_200_OK)
