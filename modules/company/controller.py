@@ -14,17 +14,12 @@ company_router = APIRouter(prefix="/tomba")
 async def get_companies(token: str | None = Header(default=None), db_session: Session = Depends(get_db_session)):
     await authenticate_ms_token(token)
     companies = db_session.query(Company).all()
-    response = {
-        'response': []
-    }
-    for company in companies:
-        total_departments = len(company.departments)
-        response['response'].append(
-            {
-                "id": company.id,
-                "name": company.name,
-                "sigla": company.sigla,
-                "total_departments": total_departments,
-            }
-        )
+
+    response = [{
+        "id": company.id,
+        "name": company.name,
+        "sigla": company.sigla,
+        "total_departments": len(company.departments),
+    } for company in companies]
+
     return JSONResponse(content=response, status_code=status.HTTP_200_OK)
