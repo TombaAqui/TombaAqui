@@ -12,5 +12,6 @@ class Equipment(Base):
     department_id = Column(Integer, ForeignKey('departments.id'))
     image = Column(String(255))
 
+    movements = relationship("EquipmentMovement", back_populates="equipment")
     department = relationship("Department", back_populates="equipments")
 

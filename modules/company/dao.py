@@ -1,5 +1,3 @@
-# dao.py
-
 from sqlalchemy.orm import Session
 
 from modules.company.modelo import Company

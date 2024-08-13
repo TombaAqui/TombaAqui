@@ -5,6 +5,7 @@ from base import Base
 from modules.company.modelo import Company
 from modules.department.modelo import Department
 from modules.equipment.modelo import Equipment
+from modules.equipment_movement.modelo import EquipmentMovement
 
 
 class Connect:
@@ -39,6 +40,9 @@ class Connect:
         if "equipments" not in self.metadata.tables:
             Base.metadata.create_all(bind=self.engine, tables=[Equipment.__table__])
             print("Table 'equipments' created.")
+        if "equipment_movements" not in self.metadata.tables:
+            Base.metadata.create_all(bind=self.engine, tables=[EquipmentMovement.__table__])
+            print("Table 'equipment_movements' created.")
 
     def get_session(self):
         return self.Session()

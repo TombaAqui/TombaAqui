@@ -13,3 +13,4 @@ class Department(Base):
 
     company = relationship("Company", back_populates="departments")
     equipments = relationship("Equipment", back_populates="department")
+    movements = relationship("EquipmentMovement", back_populates="department")
