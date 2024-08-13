@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from depends import get_db_session, authenticate_ms_token
-from modules.company.modelo import Company
+from modules.company.dao import get_all_companies
 
 company_router = APIRouter(prefix="/tomba")
 
@@ -13,8 +13,7 @@ company_router = APIRouter(prefix="/tomba")
 @company_router.get('/api/v1/company/', response_model=List[dict])
 async def get_companies(token: str | None = Header(default=None), db_session: Session = Depends(get_db_session)):
     await authenticate_ms_token(token)
-    companies = db_session.query(Company).all()
-
+    companies = get_all_companies(db_session)
     response = [{
         "id": company.id,
         "name": company.name,

@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from modules.company.modelo import Company
-from modules.department.dao import get_department_by_id
+from modules.department.dao import get_department_by_id_or_404
 from modules.department.modelo import Department
 from modules.equipment.modelo import Equipment
 from modules.equipment_movement.modelo import EquipmentMovement, get_brasilia_time
@@ -28,11 +28,15 @@ def move_equipment_db(db: Session, equipment, new_department_id: int):
     return equipment
 
 
-def get_equipment_or_404(db: Session, equipment_id: int):
+def get_equipment_by_id_or_404(db: Session, equipment_id: int):
     """
     Fetches an equipment by its ID from the database.
 
     If the equipment is not found, raises a 404 HTTPException.
+
+    Args:
+        db (Session): The database session used to perform the query.
+        equipment_id (int): The ID of the equipment to be fetched.
 
     Returns:
         The equipment instance if found.
@@ -40,8 +44,7 @@ def get_equipment_or_404(db: Session, equipment_id: int):
     Raises:
         HTTPException: If the equipment is not found, a 404 error is raised with the message "Equipment not found"
     """
-    equipment = get_equipment_by_id(db=db, equipment_id=equipment_id)
-    if not equipment:
+    if not (equipment := get_equipment_by_id(db=db, equipment_id=equipment_id)):
         raise HTTPException(status_code=404, detail="Equipment not found")
     return equipment
 
@@ -77,17 +80,15 @@ def register_equipment_movement(db: Session, equipment_id: int, department_id: i
 
 
 def validate_department_transfer(db: Session, old_department_id: int, new_department_id: int):
-    new_department = get_department_by_id(db=db, department_id=new_department_id)  # Busca o novo departamento
-    if not new_department:
-        raise HTTPException(status_code=404, detail="New department not found")
+    new_department = get_department_by_id_or_404(db=db, department_id=new_department_id, detail="New department not found")
+    old_department = get_department_by_id_or_404(db=db, department_id=old_department_id, detail="Old department not found")
     # Verifica se o departamento do equipamento é da mesma company que o novo departamento
-    old_department = get_department_by_id(db=db, department_id=old_department_id)
     if old_department.company_id != new_department.company_id:
         raise HTTPException(status_code=400, detail="Departments belong to different companies")
     return
 
 
-def get_equipment_by_company_id(db: Session, company_id: int):
+def get_equipments_by_company_id(db: Session, company_id: int):
     stmt = select(Equipment).join(Department).join(Company).where(Company.id == company_id)
     results = db.execute(stmt).scalars().all()
     return results
