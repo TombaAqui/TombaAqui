@@ -21,25 +21,20 @@ async def create_equipment(token: str = Form(...), description: str = Form(...),
     get_department_by_id_or_404(db=db_session, department_id=department_id)
     equipment = create_equipment_in_db(description, department_id, image, db_session)
     equipment_response = EquipmentResponse.from_orm(equipment)
-    return JSONResponse(content={"message": "Equipment created successfully.", "equipment": equipment_response.dict()},
-                        status_code=status.HTTP_201_CREATED)
+    return JSONResponse(content={"message": "Equipment created successfully.", "equipment": equipment_response.dict()}, status_code=status.HTTP_201_CREATED)
 
 
 @equipment_router.get("/api/v1/company/{id_company}/equipments/")
-async def get_equipments(id_company: int, token: str | None = Header(default=None),
-                         db_session: Session = Depends(get_db_session)):
+async def get_equipments(id_company: int, token: str | None = Header(default=None), db_session: Session = Depends(get_db_session)):
     await authenticate_ms_token(token)
     get_company_by_id_or_404(db=db_session, company_id=id_company)
     equipments = get_equipments_by_company_id(db_session, id_company)
-    response = [{'id': equipment.id, 'description': equipment.description,
-                                   'department': {'id': equipment.department.id, 'name': equipment.department.name},
-                                   'image': equipment.image} for equipment in equipments]
+    response = [{'id': equipment.id, 'description': equipment.description, 'department': {'id': equipment.department.id, 'name': equipment.department.name}, 'image': equipment.image} for equipment in equipments]
     return response
 
 
 @equipment_router.get("/api/v1/company/{id_company}/equipments/{id_department}/")
-async def get_equipments_by_deparment(id_company: int, id_department: int, token: str | None = Header(default=None),
-                                      db_session: Session = Depends(get_db_session)):
+async def get_equipments_by_deparment(id_company: int, id_department: int, token: str | None = Header(default=None), db_session: Session = Depends(get_db_session)):
     await authenticate_ms_token(token)
     company = get_company_by_id_or_404(db=db_session, company_id=id_company)
     department = None
@@ -53,9 +48,7 @@ async def get_equipments_by_deparment(id_company: int, id_department: int, token
 
 
 @equipment_router.put("/api/v1/equipment/{equipment_id}/")
-async def update_equipment_by(equipment_id: int, token: str = Form(...), description: str = Form(...),
-                              department_id: int = Form(...), image: UploadFile = File(None),
-                              db_session: Session = Depends(get_db_session)):
+async def update_equipment_by(equipment_id: int, token: str = Form(...), description: str = Form(...), department_id: int = Form(...), image: UploadFile = File(None), db_session: Session = Depends(get_db_session)):
     await authenticate_ms_token(token)
     equipment = get_equipment_by_id_or_404(db=db_session, equipment_id=equipment_id)
     # Se o departamento mudou, movimenta o equipamento e registra no histórico
@@ -78,12 +71,14 @@ async def update_equipment_by(equipment_id: int, token: str = Form(...), descrip
 
 
 @equipment_router.patch("/api/v1/equipment/{equipment_id}/move/")
-async def move_equipment(equipment_id: int, new_department_id: int = Form(...), db: Session = Depends(get_db_session)):
+async def move_equipment(equipment_id: int, new_department_id: int = Form(...), token: str = Form(...), db: Session = Depends(get_db_session)):
+    await authenticate_ms_token(token)
     try:
         equipment = get_equipment_by_id_or_404(db=db, equipment_id=equipment_id)
         equipment = move_equipment_db(db, equipment, new_department_id)
+        equipment_response = EquipmentResponse.from_orm(equipment)
         return JSONResponse(
-            content={"message": "Equipment moved successfully.", "equipment": equipment.dict()},
+            content={"message": "Equipment moved successfully.", "equipment": equipment_response.dict()},
             status_code=status.HTTP_200_OK)
     except HTTPException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
